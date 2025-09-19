@@ -18,6 +18,7 @@ services:
   web:
     build:
       context: .
+    image: docere-app:latest
     entrypoint: ["/entrypoint.sh", "uwsgi", "--ini", "./config/uwsgi/uwsgi.ini"]
     restart: always
 
@@ -75,6 +76,8 @@ services:
 
 
   worker: # надо пересобирать при изменениях в коде для celery
+    build:
+      context: .
     hostname: worker
     environment:
       - DJANGO_SETTINGS_MODULE=docere.prod
