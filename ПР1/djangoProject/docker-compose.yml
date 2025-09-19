@@ -18,13 +18,15 @@ services:
   web:
     build:
       context: .
-    image: docere-app:latest
     entrypoint: ["/entrypoint.sh", "uwsgi", "--ini", "./config/uwsgi/uwsgi.ini"]
     restart: always
 
     environment:
       - DJANGO_SETTINGS_MODULE=docere.prod
       - PYTHONPATH=/code
+      - SEED_DEMO=true
+      - DEMO_DOCTORS=5
+      - DEMO_PASSWORD=demo12345
     env_file:
       - .env
 
