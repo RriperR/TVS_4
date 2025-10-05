@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [".venv", "migrations", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I"]  # E,F - базовые ошибки Flake8; B - bugbear; I - isort
+ignore = ["E203"]             # W503 у Ruff нет

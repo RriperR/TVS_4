@@ -96,6 +96,19 @@ services:
     depends_on:
       - redis
 
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    command: >
+      zap-baseline.py
+      -t http://nginx:80
+      -r zap_report.html
+      -J zap_report.json
+    depends_on:
+      - nginx
+    volumes:
+      - ./reports/dynamic/baseline:/zap/wrk
+    working_dir: /zap/wrk
+
 
 volumes:
   code_volume:
