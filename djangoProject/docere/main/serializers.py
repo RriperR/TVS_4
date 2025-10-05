@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from main.models import Patient, User, Doctor, LabFile, MedicalRecord, ArchiveJob, ShareRequest, RecordShare
-
+import time
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
@@ -25,7 +25,26 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        password     = validated_data.pop('password')
+        # Получаем request из контекста (DRF пробрасывает автоматически для GenericAPIView/ViewSet)
+        request = self.context.get("request")
+        q = getattr(request, "query_params", {}) if request else {}
+
+        # --- ДЕФЕКТ 1: искусленная задержка по флагу (?slow=1) ---
+        if q.get("slow") == "1":
+            time.sleep(0.2)  # ~200мс на каждый запрос
+
+        # --- ДЕФЕКТ 2: необработанное исключение по флагу (?boom=1) ---
+        if q.get("boom") == "1":
+            raise RuntimeError("boom")  # приведёт к HTTP 500
+
+        # --- ДЕФЕКТ 3: шквал лишних SQL по флагу (?qspam=1) ---
+        # имитируем «тяжёлую» проверку уникальности email циклом exists()
+        if q.get("qspam") == "1":
+            email = validated_data.get("email")
+            for _ in range(50):  # подними/понизь число для большего/меньшего эффекта
+                User.objects.filter(email=email).exists()
+
+        password = validated_data.pop('password')
         user = User.objects.create_user(
             username    = validated_data.get('email'),
             email       = validated_data.get('email'),

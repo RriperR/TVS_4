@@ -1,6 +1,13 @@
 from locust import HttpUser, task, between
 import random, string
 
+URLS = [
+    "/api/user/register/",            # baseline
+    "/api/user/register/?slow=1",     # искусственная задержка
+    "/api/user/register/?boom=1",     # необработанное исключение
+    "/api/user/register/?qspam=1",    # N+1 или избыточные запросы
+]
+
 class RegistrationUser(HttpUser):
     wait_time = between(0.3, 1.0)
 
@@ -16,4 +23,6 @@ class RegistrationUser(HttpUser):
             "email": self.random_email(),
             "password": self.random_password(),
         }
-        self.client.post("/api/user/register/", json=data, name="register")
+        url = random.choice(URLS)
+        # имя задачи = сам URL без домена (для удобного отображения в CSV/отчётах)
+        self.client.post(url, json=data, name=url)
